@@ -1,9 +1,16 @@
 #include "BitcoinExchange.hpp"
+#include <filesystem>
 
-int main ()
+int main (int argc, char **argv)
 {
-	BitcoinExchange btc;
+	if (argc > 2) {
+		std::cout << "Too many arguments" << std::endl;
+	} else if (!std::filesystem::exists(argv[1])) {
+		std::cout << "Input file does not exist" << std::endl;
+	}
 
-	// btc.parseDataBase("data.csv");
-	btc.parseInputFile("input.txt");
+	BitcoinExchange btc;
+	btc.parseDataBase("data.csv");
+	btc.parseInputFile(argv[1]);
+	btc.calculateValues();
 }

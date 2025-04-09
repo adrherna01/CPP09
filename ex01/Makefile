@@ -3,7 +3,7 @@ CXXFLAGS = -Werror -Wall -Wextra -std=c++17
 
 NAME = main
 
-SRCS = main.cpp BitcoinExchange.cpp
+SRCS = main.cpp RPN.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 all: $(NAME)

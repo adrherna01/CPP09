@@ -1,5 +1,6 @@
 #include "PmergeMe.hpp"
 #include <cstddef>
+#include <iostream>
 
 
 
@@ -23,10 +24,18 @@ int main (int argc, char **argv) {
 		program.insertValue(value);
 		i++;
 	}
-	program.printInitVector();
 
-	program.algorithm();
+	program.printMainChain("Before");
+	program.setVecInit();
+	program.algorithmVec();
+	program.setVecFinish();
+	program.printMainChain("After");
 
-	program.printInitVector();
+	program.setDequeInit();
+	program.algorithmDeque();
+	program.setDequeFinish();
+
+	std::cout << "It took for Vector " << program.calculateDurationVec() << " us"<< std::endl;
+	std::cout << "It took for Deque " << program.calculateDurationDeque() << " us"<< std::endl;
 
 }

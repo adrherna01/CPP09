@@ -1,6 +1,7 @@
 #include "PmergeMe.hpp"
 #include <cstddef>
 #include <iostream>
+#include <sys/_pthread/_pthread_rwlock_t.h>
 
 
 
@@ -27,12 +28,12 @@ int main (int argc, char **argv) {
 
 	program.printMainChain("Before");
 	program.setVecInit();
-	program.algorithmVec();
+	program.algorithmVec(program._mainChainVec);
 	program.setVecFinish();
 	program.printMainChain("After");
 
 	program.setDequeInit();
-	program.algorithmDeque();
+	program.algorithmDeque(program._mainChainDeque);
 	program.setDequeFinish();
 
 	std::cout << "It took for Vector " << program.calculateDurationVec() << " us"<< std::endl;

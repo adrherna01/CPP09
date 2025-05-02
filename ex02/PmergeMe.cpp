@@ -27,17 +27,17 @@ void PmergeMe::setDequeFinish() {
 	_dequeEnd= getTime();
 }
 
-sizetVector PmergeMe::generateJacobsthalInsertionOrder() {
+sizetVector PmergeMe::generateJacobsthalInsertionOrder(vector& secChain) {
 	sizetVector order;
-	sizetVector jacob = generateJacobsthalSequence(_secondaryChainVec.size());
+	sizetVector jacob = generateJacobsthalSequence(secChain.size());
 
-	// Build order from Jacobsthal sequence
+	// order from Jacobsthal sequence
 	for (size_t j = 1; j < jacob.size(); ++j) {
 		size_t start = jacob[j - 1] + 1;
-		size_t end = std::min(jacob[j], _secondaryChainVec.size() - 1);
+		size_t end = std::min(jacob[j], secChain.size() - 1);
 
-		// Add indices in reverse order (for efficiency)
-		for (size_t i = end; i >= start; --i) {
+		// add indices in reverse order
+		for (size_t i = end + 1; i-- > start;) {
 			order.push_back(i);
 		}
 	}
@@ -45,150 +45,153 @@ sizetVector PmergeMe::generateJacobsthalInsertionOrder() {
 	return order;
 }
 
-void PmergeMe::insertSingleElementVec(int value) {
-	auto insertPos = std::lower_bound(_mainChainVec.begin(), _mainChainVec.end(), value);
-	_mainChainVec.insert(insertPos, value);
+void PmergeMe::insertSingleElementVec(int value, vector& mainChain) {
+	auto insertPos = std::lower_bound(mainChain.begin(), mainChain.end(), value);
+	mainChain.insert(insertPos, value);
 }
 
-void PmergeMe::binaryInsertionVec() {
-	if (_secondaryChainVec.empty()) return;
+void PmergeMe::binaryInsertionVec(vector& mainChain, vector& secChain) {
+	if (secChain.empty()) return;
 
-	std::cout << "AAA chain\n";
-	printVector(_secondaryChainVec);
-	std::cout << "BBB chain\n";
-	printVector(_mainChainVec);
+	// std::cout << "Before MainChain in Insertion\n";
+	// printVector(mainChain);
+	// std::cout << "Before SecChain in Insertion\n";
+	// printVector(secChain);
 
-	// Step 1: Insert first pend element
-	insertSingleElementVec(_secondaryChainVec[0]);
+	// Insert first pend element
+	insertSingleElementVec(secChain[0], mainChain);
 
-	// Step 2: Generate Jacobsthal sequence
-	std::vector<size_t> insertionOrder = generateJacobsthalInsertionOrder();
-	printVector(insertionOrder);
+	// gen Jacobsthal sequence
+	std::vector<size_t> insertionOrder = generateJacobsthalInsertionOrder(secChain);
+	// printVector(insertionOrder);
 
-	// Step 3: Insert remaining elements in optimized order
+	// insert remaining elements in optimized order
 	for (size_t index : insertionOrder) {
-		if (index < _secondaryChainVec.size()) {
-			insertSingleElementVec(_secondaryChainVec[index]);
-			// std::cout << "Main chain\n\n";
-			// printVector(_mainChainVec);
+		if (index < secChain.size()) {
+			insertSingleElementVec(secChain[index], mainChain);
 		}
 	}
 
-	_secondaryChainVec.clear();
+	// std::cout << "After MainChain in Insertion\n";
+	// printVector(mainChain);
+	// std::cout << "After SecChain in Insertion\n";
+	// printVector(secChain);
+	secChain.clear();
 }
 
-// void PmergeMe::binaryInsertionVec(vector& mainChain, vector& secChain){
-// 	if (secChain.empty()) return;
-
-// 	std::cout << "AAA chain\n";
-// 	printVector(secChain);
-// 	std::cout << "BBB chain\n";
-// 	printVector(mainChain);
-
-// 	// Step 1: Insert first pend element
-// 	insertSingleElementVec(secChain[0]);
-
-// 	// Step 2: Generate Jacobsthal sequence
-// 	std::vector<size_t> insertionOrder = generateJacobsthalInsertionOrder();
-// 	printVector(insertionOrder);
-
-// 	// Step 3: Insert remaining elements in optimized order
-// 	for (size_t index : insertionOrder) {
-// 		if (index < secChain.size()) {
-// 			insertSingleElementVec(secChain[index]);
-// 			// std::cout << "Main chain\n\n";
-// 			// printVector(mainChain);
-// 		}
-// 	}
-
-// 	secChain.clear();
-// }
-
-void PmergeMe::separatePairsVec() {
+void PmergeMe::separatePairsVec(vector& mainChain, vector& secChain, vector& newMain) {
 	int a;
 	int b;
-	vector newMain;
 
-	for (size_t i = 0; i < _mainChainVec.size(); i += 2)
+	for (size_t i = 0; i < mainChain.size(); i += 2)
 	{
-		if (i + 1 >= _mainChainVec.size()) {
-			_secondaryChainVec.push_back(_mainChainVec[i]);
+		if (i + 1 >= mainChain.size()) {
+			secChain.push_back(mainChain[i]);
 		} else {
-			a = _mainChainVec[i];
-			b = _mainChainVec[i + 1];
+			a = mainChain[i];
+			b = mainChain[i + 1];
 			newMain.push_back(a > b ? a : b);
-			_secondaryChainVec.push_back(a > b ? b : a);
+			secChain.push_back(a > b ? b : a);
 		}
 	}
-	_mainChainVec = newMain;
 }
 
-void PmergeMe::algorithmVec() {
-	if (_mainChainVec.size() <= 1) return;
+void PmergeMe::algorithmVec(vector& mainChain) {
+	if (mainChain.size() <= 1) {
+		_finalMain = mainChain;
+		return;
+	}
 
-	separatePairsVec();
+	vector newMain;
+	vector secChain;
+
+	separatePairsVec(mainChain, secChain, newMain);
 	std::cout << "MainChain Vector:\n";
-	printVector(_mainChainVec);
+	printVector(newMain);
 	std::cout << "SecondaryChain Vector:\n";
-	printVector(_secondaryChainVec);
+	printVector(secChain);
 	std::cout << std::endl;
-	algorithmVec();
-	binaryInsertionVec();
+	algorithmVec(newMain);
+	binaryInsertionVec(newMain, secChain);
+	mainChain = newMain;
+	_finalMain = newMain;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void PmergeMe::insertSingleElementDeque(int value) {
-	auto insertPos = std::lower_bound(_mainChainDeque.begin(), _mainChainDeque.end(), value);
-	_mainChainDeque.insert(insertPos, value);
+void PmergeMe::insertSingleElementDeque(int value, deque& mainChain) {
+	auto insertPos = std::lower_bound(mainChain.begin(), mainChain.end(), value);
+	mainChain.insert(insertPos, value);
 }
 
-void PmergeMe::binaryInsertionDeque() {
-	if (_secondaryChainDeque.empty()) return;
+sizetDeque PmergeMe::generateJacobsthalInsertionOrder(deque& secChain) {
+	sizetDeque order;
+	sizetVector jacob = generateJacobsthalSequence(secChain.size());
 
-	insertSingleElementDeque(_secondaryChainDeque[0]);
-	std::vector<size_t> insertionOrder = generateJacobsthalInsertionOrder();
-	for (size_t index : insertionOrder) {
-		if (index < _secondaryChainDeque.size()) {
-			insertSingleElementDeque(_secondaryChainDeque[index]);
+	for (size_t j = 1; j < jacob.size(); ++j) {
+		size_t start = jacob[j - 1] + 1;
+		size_t end = std::min(jacob[j], secChain.size() - 1);
 
+		for (size_t i = end + 1; i-- > start;) {
+			order.push_back(i);
 		}
 	}
 
-	_secondaryChainDeque.clear();
+	return order;
 }
 
-void PmergeMe::separatePairsDeque() {
+void PmergeMe::binaryInsertionDeque(deque& mainChain, deque& secChain) {
+	if (secChain.empty()) return;
+
+	// Insert first pend element
+	insertSingleElementDeque(secChain[0], mainChain);
+
+	// gen Jacobsthal sequence
+	sizetDeque insertionOrder = generateJacobsthalInsertionOrder(secChain);
+
+	// insert remaining elements in optimized order
+	for (size_t index : insertionOrder) {
+		if (index < secChain.size()) {
+			insertSingleElementDeque(secChain[index], mainChain);
+		}
+	}
+
+	secChain.clear();
+}
+
+void PmergeMe::separatePairsDeque(deque& mainChain, deque& secChain, deque& newMain) {
 	int a;
 	int b;
-	deque newMain;
 
-	for (size_t i = 0; i < _mainChainDeque.size(); i += 2)
+	for (size_t i = 0; i < mainChain.size(); i += 2)
 	{
-		if (i + 1 >= _mainChainDeque.size()) {
-			_secondaryChainDeque.push_back(_mainChainDeque[i]);
+		if (i + 1 >= mainChain.size()) {
+			secChain.push_back(mainChain[i]);
 		} else {
-			a = _mainChainDeque[i];
-			b = _mainChainDeque[i + 1];
+			a = mainChain[i];
+			b = mainChain[i + 1];
 			newMain.push_back(a > b ? a : b);
-			_secondaryChainDeque.push_back(a > b ? b : a);
+			secChain.push_back(a > b ? b : a);
 		}
 	}
-	_mainChainDeque = newMain;
 }
 
-void PmergeMe::algorithmDeque() {
-	if (_mainChainDeque.size() <= 1) return;
+void PmergeMe::algorithmDeque(deque& mainChain) {
+	if (mainChain.size() <= 1) {
+		_finalMainDeque = mainChain;
+		return;
+	}
 
-	separatePairsDeque();
-	// std::cout << "MainChain Vector:\n";
-	// printVector(_mainChain);
-	// std::cout << "SecondaryChain Vector:\n";
-	// printVector(_secondaryChainDeque);
-	// std::cout << std::endl;
-	algorithmDeque();
-	binaryInsertionDeque();
+	deque newMain;
+	deque secChain;
+
+	separatePairsDeque(mainChain, secChain, newMain);
+	algorithmDeque(newMain);
+	binaryInsertionDeque(newMain, secChain);
+	mainChain = newMain;
+	_finalMainDeque = newMain;
 }
+
 
 ////////////////////////////////////////////////////////////////////
 
@@ -240,9 +243,9 @@ void printVector(const std::vector<size_t>& vec) {
 
 void PmergeMe::printMainChain(const string& message) {
 	std::cout << message << ": ";
-	for (size_t i = 0; i < _mainChainVec.size(); ++i) {
-		std::cout << _mainChainVec[i];
-		if (i != _mainChainVec.size() - 1)
+	for (size_t i = 0; i < _finalMain.size(); ++i) {
+		std::cout << _finalMain[i];
+		if (i != _finalMain.size() - 1)
 			std::cout << " ";
 	}
 	std::cout << std::endl;

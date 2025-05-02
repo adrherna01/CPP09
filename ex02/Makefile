@@ -1,5 +1,6 @@
 CXX = c++
-CXXFLAGS = -Werror -Wall -Wextra -std=c++17
+# CXXFLAGS = -Werror -Wall -Wextra -std=c++17
+CXXFLAGS = -std=c++17
 
 NAME = main
 

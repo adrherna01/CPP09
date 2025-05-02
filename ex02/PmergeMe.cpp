@@ -31,17 +31,19 @@ sizetVector PmergeMe::generateJacobsthalInsertionOrder(vector& secChain) {
 	sizetVector order;
 	sizetVector jacob = generateJacobsthalSequence(secChain.size());
 
-	// order from Jacobsthal sequence
-	for (size_t j = 1; j < jacob.size(); ++j) {
-		size_t start = jacob[j - 1] + 1;
-		size_t end = std::min(jacob[j], secChain.size() - 1);
+	// printVector(jacob);
 
-		// add indices in reverse order
-		for (size_t i = end + 1; i-- > start;) {
+	// Add all missing indices between Jacobsthal numbers in reverse
+	for (size_t j = 1; j < jacob.size(); ++j) {
+		for (size_t i = std::min(jacob[j], secChain.size() - 1); i > jacob[j - 1]; --i) {
 			order.push_back(i);
+			// std::cout << "j was: " << j << "\n";
+			// std::cout << "Jacob was: " << jacob[j] << "\n";
+			// std::cout << "Pushed: " << i << "\n";
 		}
 	}
 
+	// printVector(order);
 	return order;
 }
 
@@ -53,17 +55,12 @@ void PmergeMe::insertSingleElementVec(int value, vector& mainChain) {
 void PmergeMe::binaryInsertionVec(vector& mainChain, vector& secChain) {
 	if (secChain.empty()) return;
 
-	// std::cout << "Before MainChain in Insertion\n";
-	// printVector(mainChain);
-	// std::cout << "Before SecChain in Insertion\n";
-	// printVector(secChain);
-
 	// Insert first pend element
 	insertSingleElementVec(secChain[0], mainChain);
+	// printVector(mainChain);
 
 	// gen Jacobsthal sequence
 	std::vector<size_t> insertionOrder = generateJacobsthalInsertionOrder(secChain);
-	// printVector(insertionOrder);
 
 	// insert remaining elements in optimized order
 	for (size_t index : insertionOrder) {
@@ -72,12 +69,43 @@ void PmergeMe::binaryInsertionVec(vector& mainChain, vector& secChain) {
 		}
 	}
 
-	// std::cout << "After MainChain in Insertion\n";
-	// printVector(mainChain);
-	// std::cout << "After SecChain in Insertion\n";
-	// printVector(secChain);
 	secChain.clear();
 }
+
+// void PmergeMe::binaryInsertionVec(vector& mainChain, vector& secChain) {
+// 	if (secChain.empty()) return;
+
+// 	// gen Jacobsthal sequence
+// 	std::vector<size_t> insertionOrder = generateJacobsthalInsertionOrder(secChain);
+// 	// std::cout << "Insetion order \n";
+// 	// printVector(insertionOrder);
+
+// 	// std::cout << "Before MainChain in Insertion\n";
+// 	// printVector(mainChain);
+// 	// std::cout << "Before SecChain in Insertion\n";
+// 	// printVector(secChain);
+
+// 	// // Insert first pend element
+// 	// std::cout << "Num Inserted: " << secChain[0] <<"\n";
+// 	// insertSingleElementVec(secChain[0], mainChain);
+// 	// printVector(mainChain);
+
+// 	// insert remaining elements in optimized order
+// 	for (size_t index : insertionOrder) {
+// 		if (index < secChain.size()) {
+// 			insertSingleElementVec(secChain[index], mainChain);
+// 			// std::cout << "Num Inserted: " << secChain[index] << "\n";
+// 			// printVector(mainChain);
+// 		}
+// 	}
+
+// 	// std::cout << "After MainChain in Insertion\n";
+// 	// printVector(mainChain);
+// 	// std::cout << "After SecChain in Insertion\n";
+// 	// printVector(secChain);
+// 	secChain.clear();
+// 	std::cout << "\n";
+// }
 
 void PmergeMe::separatePairsVec(vector& mainChain, vector& secChain, vector& newMain) {
 	int a;
@@ -106,11 +134,13 @@ void PmergeMe::algorithmVec(vector& mainChain) {
 	vector secChain;
 
 	separatePairsVec(mainChain, secChain, newMain);
-	std::cout << "MainChain Vector:\n";
-	printVector(newMain);
-	std::cout << "SecondaryChain Vector:\n";
-	printVector(secChain);
-	std::cout << std::endl;
+	// std::cout << "MainChain Vector:\n";
+	// printVector(newMain);
+	// std::cout << "SecondaryChain Vector:\n";
+	// printVector(secChain);
+	// std::cout << std::endl;
+	// std::cout << "finalChain Vector:\n";
+	// printVector(newMain);
 	algorithmVec(newMain);
 	binaryInsertionVec(newMain, secChain);
 	mainChain = newMain;
@@ -243,9 +273,9 @@ void printVector(const std::vector<size_t>& vec) {
 
 void PmergeMe::printMainChain(const string& message) {
 	std::cout << message << ": ";
-	for (size_t i = 0; i < _finalMain.size(); ++i) {
-		std::cout << _finalMain[i];
-		if (i != _finalMain.size() - 1)
+	for (size_t i = 0; i < _mainChainVec.size(); ++i) {
+		std::cout << _mainChainVec[i];
+		if (i != _mainChainVec.size() - 1)
 			std::cout << " ";
 	}
 	std::cout << std::endl;
